@@ -30,4 +30,12 @@ Player can enter a command that returns the current time, utilizes mutexes and m
    - connections must have matching connections coming back
    - room can't have an connection that points to itself
    - room can't have more than one connect to the same room
- - 
+ 
+ ## Program 2 part 2
+ - Overview
+   - Provides an interface for playing the game using the most recently generated rooms
+ - The Game
+   - Present interface to the player
+   - Use the most recently created files:
+     - perform a stat() function call on rooms directory in the same directory as the game
+     - open the one with the most recent st_mtime component of the returned stat struct
