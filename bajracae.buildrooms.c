@@ -45,6 +45,7 @@ int main() {
 	while (IsGraphFull(rooms_struct_array) == false) {
 		AddRandomConnection(rooms_struct_array);
 	}
+	printStruct(rooms_struct_array);
 	createFiles(rooms_struct_array, tenrooms);
 	return 0;
 }
@@ -54,11 +55,9 @@ bool IsGraphFull(struct room * rooms) {
 	int i;
 	for(i = 0; i < 7; i++) {
 		if(rooms[i].numConnection >= 3 && rooms[i].numConnection <= 6) {
-			// printf("Inside the counter condition\n");
 			counter++;
 		}
 	}
-	// printf("Counter in graph: %d\n", counter);
 	if(counter == 7) {
 		return true;
 	}
@@ -70,33 +69,17 @@ void AddRandomConnection(struct room * rooms) {
 	struct room * B;
 	while(true) {
 		A = GetRandomRoom(rooms);
-		// // printf("A connection: %c\n",A->connections[1]);
-		// A->connections[1] = 'T';
-		// // printf("A connection: %c\n",A->connections[1]);
-		// printf("Name: %s\n", A->name);
-		// printf("ID: %d\n", A->id);
-		// printf("Room Type: %s\n", A->roomType);
-		// int i;
-		// for(i = 0; i < 6; i++){
-		// 	printf("Connection: %c\n", A->connections[i]);
-		// }
-		// printf("\n");
-		// return;
+		
 		if(CanAddConnectionFrom(A) == true) {
-			// printf("Connection can be added\n");
 			break;
 		}
 	}
-	// printf("While loop break\n");
 
 	do {
 		B = GetRandomRoom(rooms);
 	}
 	while(CanAddConnectionFrom(B) == false || IsSameRoom(A, B) == true || ConnectAlreadyExists(A, B) == true);
 	ConnectRoom(A, B);
-	// printf("A numConnection: %d\n", A->numConnection);
-	// printf("B numConnection: %d\n", B->numConnection);
-	// ConnectRoom(B, A);
 }
 
 struct room * GetRandomRoom(struct room * rooms) {
@@ -115,66 +98,22 @@ bool CanAddConnectionFrom(struct room * x) {
 
 bool ConnectAlreadyExists(struct room * x, struct room * y) {
 	if((x->connections[y->id] == 'T') && (y->connections[x->id] == 'T')) {
-		// printf("Connect exists already\n"); // NEVER REACHES HERE
 		return true;
 	}
-	// printf("Connection doesn't exist\n");
 	return false;
 }
 
 void ConnectRoom(struct room * x, struct room * y) {
-	// printf("XName: %s\n", x->name);
-	// printf("XID: %d\n", x->id);
-	// printf("XRoom Type: %s\n", x->roomType);
-	// printf("XNumber of Connections: %d\n", x->numConnection);
-	// int i;
-	// for(i = 0; i < 6; i++){
-	// 	printf("XConnection: %c\n", x->connections[i]);
-	// }
-	// 
-	// printf("YName: %s\n", y->name);
-	// printf("YID: %d\n", y->id);
-	// printf("YRoom Type: %s\n", y->roomType);
-	// printf("Number of Connections: %d\n", y->numConnection);
-	// int j;
-	// for(j = 0; j < 6; j++){
-	// 	printf("YConnection: %c\n", y->connections[j]);
-	// }
-	// printf("\n");
 	x->connections[y->id] = 'T';
 	y->connections[x->id] = 'T';
 	x->numConnection++;
-	// printf("x numConnections: %d\n", x->numConnection);
 	y->numConnection++;
-	// printf("y numConnections: %d\n\n", y->numConnection);
-	// printf("Room is connected\n");
-	
-	// printf("XName: %s\n", x->name);
-	// printf("XID: %d\n", x->id);
-	// printf("XRoom Type: %s\n", x->roomType);
-	// printf("XNumber of Connections: %d\n", x->numConnection);
-	// // int i;
-	// for(i = 0; i < 6; i++){
-	// 	printf("XConnection: %c\n", x->connections[i]);
-	// }
-	// 
-	// printf("YName: %s\n", y->name);
-	// printf("YID: %d\n", y->id);
-	// printf("YRoom Type: %s\n", y->roomType);
-	// printf("Number of Connections: %d\n", y->numConnection);
-	// // int j;
-	// for(j = 0; j < 6; j++){
-	// 	printf("YConnection: %c\n", y->connections[j]);
-	// }
-	// printf("-------------------------------------\n");
 }
 
 bool IsSameRoom(struct room * x, struct room * y) {
 	if(x->id == y->id) {
-		// printf("Same Room\n");
 		return true;
 	}
-	// printf("Not the same room\n");
 	return false;
 }
 
@@ -280,9 +219,7 @@ void printStruct(struct room * rooms) {
 		printf("ID: %d\n", rooms[i].id);
 		printf("Room Type: %s\n", rooms[i].roomType);
 		printf("Number of Connections: %d\n", rooms[i].numConnection);
-		for(j = 0; j < 7; j++) {
-			// printf("%c\n", rooms[i].connections[j]);
-			
+		for(j = 0; j < 7; j++) {			
 			if(rooms[i].connections[j] == 'T') {
 				printf("Connection with: %s\n", rooms[j].name);
 			}
@@ -295,12 +232,14 @@ void createFiles(struct room * rooms, char ** tenNames) {
 	int i;
 	for(i = 0; i < 7; i++) {
 		char filename[50];
-		sprintf(filename, "%s_room", tenNames[i]);
+		sprintf(filename, "%s", tenNames[i]);
 		files[i] = fopen(filename, "w");
 		fprintf(files[i], "ROOM NAME: %s\n", rooms[i].name);
 		int j;
-		for(j = 0; j < rooms[i].numConnection; j++) {
-			fprintf(files[i],"CONNECTION %d: %s\n", j+1, rooms[j].name);
+		for(j = 0; j < 7; j++) {
+			if(rooms[i].connections[j] == 'T') {
+				fprintf(files[i],"CONNECTION %d: %s\n", j+1, rooms[j].name);
+			}
 		}
 		fprintf(files[i], "ROOM TYPE: %s\n", rooms[i].roomType);
 		fclose(files[i]);
