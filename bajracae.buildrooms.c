@@ -45,7 +45,7 @@ int main() {
 	while (IsGraphFull(rooms_struct_array) == false) {
 		AddRandomConnection(rooms_struct_array);
 	}
-	printStruct(rooms_struct_array);
+	// printStruct(rooms_struct_array);
 	createFiles(rooms_struct_array, tenrooms);
 	return 0;
 }
@@ -230,6 +230,7 @@ void printStruct(struct room * rooms) {
 void createFiles(struct room * rooms, char ** tenNames) {
 	FILE * files[7];
 	int i;
+	int index = 1;
 	for(i = 0; i < 7; i++) {
 		char filename[50];
 		sprintf(filename, "%s", tenNames[i]);
@@ -238,9 +239,11 @@ void createFiles(struct room * rooms, char ** tenNames) {
 		int j;
 		for(j = 0; j < 7; j++) {
 			if(rooms[i].connections[j] == 'T') {
-				fprintf(files[i],"CONNECTION %d: %s\n", j+1, rooms[j].name);
+				fprintf(files[i],"CONNECTION %d: %s\n", index, rooms[j].name);
+				index++;
 			}
 		}
+		index = 1;
 		fprintf(files[i], "ROOM TYPE: %s\n", rooms[i].roomType);
 		fclose(files[i]);
 	}	
