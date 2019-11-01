@@ -137,7 +137,7 @@ char ** randomTenRooms() {
 	tenNames[6] = "Covell";
 	tenNames[7] = "Owen";
 	tenNames[8] = "Kearney";
-	tenNames[9] = "Withycombe";
+	tenNames[9] = "Withy";
 
 	int i;
 	for(i = 0; i < 10; i++) {
