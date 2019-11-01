@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <time.h>
 
 // GLOBAL VARIABLES
 pthread_mutex_t mp;
@@ -23,6 +24,7 @@ void gameFunction(struct room * rooms);
 char * getValidRoom(struct room eachRoom);
 bool connectionExists(char * userInput, struct room eachRoom);
 bool askTime(char * userInput);
+void * timeIntoTxt(void);
 
 struct room {
 	int id;
@@ -47,12 +49,13 @@ int main() {
 	// call gameFunction
 	// unlock and destroy mutex
 
-	mp = PTHREAD_MUTEX_INITIALIZER;
-	pthread_mutex_lock(&mp);
-	gameFunction(rooms_struct_array);
-	pthread_mutex_unlock(&mp);
-	pthread_mutex_destroy(&mp);
-	
+	// mp = PTHREAD_MUTEX_INITIALIZER;
+	// pthread_mutex_lock(&mp);
+	// gameFunction(rooms_struct_array);
+	// pthread_mutex_unlock(&mp);
+	// pthread_mutex_destroy(&mp);
+
+	timeIntoTxt();
 	// printStruct(rooms_struct_array);
     return 0;
 }
@@ -219,6 +222,28 @@ void gameFunction(struct room * rooms) {
 		}
 	}
 }
+
+
+
+// CITE: https://stackoverflow.com/questions/5141960/get-the-current-time-in-c
+void * timeIntoTxt(void) {
+	time_t timer = time(NULL);
+	char s[100];
+	size_t max = 100;
+	struct tm * info;
+
+	info = localtime(&timer);
+	strftime(s, max, "%l:%M%P, %A, %B %d, %Y", info);
+	
+	FILE * file;
+	printf("Hello\n");
+	fflush(stdout);
+	file = fopen("currentTime.txt", "w+");
+	fprintf(file, s);
+	fclose(file);
+}
+
+// void * 
 
 bool connectionExists(char * userInput, struct room eachRoom) {
 	int i;
