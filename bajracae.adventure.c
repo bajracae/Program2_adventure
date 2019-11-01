@@ -6,6 +6,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <stdbool.h>
+
+// GLOBAL VARIABLES
+pthread_mutex_t mp;
+pthread_t mp2;
 
 void findLatestFile(char * newestDirName);
 struct room * createStruct();
@@ -14,6 +19,10 @@ void readStructID(struct room * rooms);
 void readRoomType(char * newestDirName, struct room * rooms);
 void fillStruct(char * newestDirName, struct room * rooms);
 void printStruct(struct room * rooms);
+void gameFunction(struct room * rooms);
+char * getValidRoom(struct room eachRoom);
+bool connectionExists(char * userInput, struct room eachRoom);
+bool askTime(char * userInput);
 
 struct room {
 	int id;
@@ -26,28 +35,25 @@ struct room {
 };
 
 int main() {
-	
-	// init and lock mutex
-	// CITE=======================================================================
-	// https://docs.oracle.com/cd/E19455-01/806-5257/sync-112/index.html
-	// pthread_mutex_t mp = PTHREAD_MUTEX_INITIALIZER;
-	// pthread_mutex_lock(&mp);
-	
-	// spawn time_thread with time function (lock mutex and unlock in time function)
-	
-	// call gameFunction
-	// unlock and destroy mutex
-    
+
     char newestDirName[256];
     findLatestFile(newestDirName); // Name of the latest file
-    
-    // DIR * gameDir = opendir(newestDirName);
     struct room * rooms_struct_array = createStruct();
-    // readRoomNames(newestDirName, rooms_struct_array);
-    // readStructID(rooms_struct_array);
-	// readRoomType(newestDirName, rooms_struct_array);
-	// fillStruct(newestDirName, rooms_struct_array);
-    printStruct(rooms_struct_array);
+	fillStruct(newestDirName, rooms_struct_array);
+	// CITE=======================================================================
+	// https://docs.oracle.com/cd/E19455-01/806-5257/sync-112/index.html
+	// init and lock mutex
+	// spawn time_thread with time function (lock mutex and unlock in time function)
+	// call gameFunction
+	// unlock and destroy mutex
+
+	mp = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_lock(&mp);
+	gameFunction(rooms_struct_array);
+	pthread_mutex_unlock(&mp);
+	pthread_mutex_destroy(&mp);
+	
+	// printStruct(rooms_struct_array);
     return 0;
 }
 
@@ -117,7 +123,6 @@ void fillStruct(char * newestDirName, struct room * rooms) {
 	while((filename = readdir(gameDir)) != NULL) {
 		if((strcmp(".", filename->d_name) != 0) && (strcmp("..", filename->d_name) != 0)) {
 			file = fopen(filename->d_name, "r");
-			// if ( (file = fopen(filename->d_name, "r")  ) == NULL) perror("Failed to open file:");
 			while(fscanf(file, "ROOM NAME: %ms\n", &name)) {
 				rooms[i].name = name;
 			}
@@ -126,16 +131,8 @@ void fillStruct(char * newestDirName, struct room * rooms) {
 				strcpy(rooms[i].connections[j], eachConnect);
 				j++;
 			}
-			// fseek(file, rooms[i].numConnection+2, 1);
 			getline(&temp2, &temp, file);
-			// printf("%s\n", type);
-			// while(fscanf(file, "ROOM TYPE: %s\n", type)) {
-			// 	// printf("Hello\n");
-			// 	rooms[i].roomType = type;
-			// 	// printf("%s\n", rooms[i].roomType );
-			// }
 			if(sscanf(temp2, "ROOM TYPE: %ms\n", &type) > 0) {
-				// printf("Here: %s\n", type);
 				rooms[i].roomType = type;
 			}
 			i++;
@@ -151,7 +148,6 @@ void printStruct(struct room * rooms) {
 	int i, j;
 	for(i = 0; i < 7; i++){
 		printf("Name: %s\n", rooms[i].name);
-		// printf("ID: %d\n", rooms[i].id);
 		printf("Number of Connections: %d\n", rooms[i].numConnection);
 		for(j = 0; j < rooms[i].numConnection; j++) {			
 			printf("CONNECTION %d: %s\n", j+1, rooms[i].connections[j]);
@@ -160,15 +156,85 @@ void printStruct(struct room * rooms) {
 	}
 }
 
-void gameFunction() {
-	// while loop to run the game
+void gameFunction(struct room * rooms) {
+	char * currentType = NULL;
 	
-	// if time requested {
-	// unlock mutex 
-	// wait for time thread to execute
-	// lock mutex
-	// spawn another time thread // the other time-thread has finished execution and doesn't exist anymore 
-	// }
+	// Find the index of the start room
+	int start = 0;
+	int index = 0;
+	for(start = 0; start < 7; start++) {
+		if(strcmp(rooms[start].roomType, "START_ROOM") == 0) {
+			index = start;
+		}
+	}
+	
+	char * paths[256];
+	char * userInput = NULL;
+	size_t len = 0;
+	int pathCounter = 0;
+	 
+	int i, j, k;
+	while(currentType != "END_ROOM") {
+		printf("CURRENT LOCATION: %s\n", rooms[index].name);
+		printf("POSSIBLE CONNECTIONS: ");
+		for(j = 0; j < rooms[index].numConnection; j++) {
+			if(j != rooms[index].numConnection - 1) {
+				printf("%s, ", rooms[index].connections[j]);
+			}
+			else {
+				printf("%s.", rooms[index].connections[j]);
+			}
+		} 
+		printf("\n");
+		printf("WHERE TO? >");
+		getline(&userInput, &len, stdin);
+		userInput[strlen(userInput) - 1] = 0;
+		if((connectionExists(userInput, rooms[index]) != true) && (askTime(userInput) != true)) {
+			printf("HUH? I DON’T UNDERSTAND THAT ROOM. TRY AGAIN.\n");
+		}
+		else {
+			if(askTime(userInput) == true) {
+				pthread_mutex_unlock(&mp);
+				
+				pthread_mutex_lock(&mp);
+			}
+			else {
+				for(i = 0; i < 7; i++) {
+					if(strcmp(userInput, rooms[i].name) == 0) {
+						index = i;
+						paths[pathCounter] = rooms[index].name;
+						pathCounter++;
+					}
+				}
+				currentType = rooms[index].roomType;
+				if(strcmp(currentType, "END_ROOM") == 0) {
+					printf("YOU HAVE FOUND THE END ROOM. CONGRATULATIONS!\n");
+					printf("YOU TOOK %d STEPS. YOUR PATH TO VICTORY WAS:\n", pathCounter);
+					for(k = 0; k < pathCounter; k++) {
+						printf("%s\n", paths[k]);
+					}
+					break;
+				}
+			}
+		}
+	}
 }
 
+bool connectionExists(char * userInput, struct room eachRoom) {
+	int i;
+	for(i = 0; i < eachRoom.numConnection; i++) {
+		// printf("Connection %d: %d\n", i, strcmp(userInput, eachRoom.connections[i]));
+		if(strcmp(userInput, eachRoom.connections[i]) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool askTime(char * userInput) {
+	if(strcmp(userInput, "time") == 0) {
+		return true;
+	}
+	return false;
+}
 
