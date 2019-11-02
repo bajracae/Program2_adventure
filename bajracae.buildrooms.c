@@ -1,3 +1,10 @@
+///////////////////////////////////////////////////////////////////
+// Title: Program 2 - Adventure
+// Description: A program that randomly generates rooms for the adventure game.
+// Author: Aeijan Bajracharya
+// Date: 1 November 2019
+///////////////////////////////////////////////////////////////////
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -98,7 +105,7 @@ struct room * createStruct() {
 ///////////////////////////////////////////////////////////////////
 char ** randomTenRooms() {
 	char ** tenNames = malloc(sizeof(char *) * 10); // Allocating memory for the ten rooms
-	// Hard coding names into the tenNames array
+	// Hard coded names into the tenNames array
 	tenNames[0] = "Dearborn";
 	tenNames[1] = "Kelley";
 	tenNames[2] = "LINC";
@@ -226,22 +233,22 @@ void fillConnections(struct room * rooms) {
 void createFiles(struct room * rooms, char ** tenNames) {
 	FILE * files[7]; // Array of seven files
 	int i;
-	int index = 1;
+	int index = 1; // counter for %d in "CONNECTION %d: %s"
 	for(i = 0; i < 7; i++) {
-		char filename[50];
-		sprintf(filename, "%s", tenNames[i]);
-		files[i] = fopen(filename, "w");
-		fprintf(files[i], "ROOM NAME: %s\n", rooms[i].name);
+		char filename[50]; // Stores name of file
+		sprintf(filename, "%s", tenNames[i]); // File name is set to the name of the rooms
+		files[i] = fopen(filename, "w"); // Opens the file and gives writting permissions for each file
+		fprintf(files[i], "ROOM NAME: %s\n", rooms[i].name); // Writes the room name into the file
 		int j;
 		for(j = 0; j < 7; j++) {
-			if(rooms[i].connections[j] == 'T') {
-				fprintf(files[i],"CONNECTION %d: %s\n", index, rooms[j].name);
+			if(rooms[i].connections[j] == 'T') { // If the char in rooms[i].connections[j] is "T", then the room at index j is a connection to rooms[i]
+				fprintf(files[i],"CONNECTION %d: %s\n", index, rooms[j].name); // Writes the connections of each room, based on the index of T's in connections, into the file 
 				index++;
 			}
 		}
 		index = 1;
-		fprintf(files[i], "ROOM TYPE: %s\n", rooms[i].roomType);
-		fclose(files[i]);
+		fprintf(files[i], "ROOM TYPE: %s\n", rooms[i].roomType); // Writes the room type into the file
+		fclose(files[i]); // Closes the File
 	}	
 }
 
