@@ -1,10 +1,12 @@
 ///////////////////////////////////////////////////////////////////
-// Title: Program 2 - Adventure
-// Description: A program that randomly generates rooms for the adventure game.
 // Author: Aeijan Bajracharya
-// Date: 1 November 2019
+// Title: Program 2 - Adventure
+// Description: This program randomly generates seven rooms (files) in a directory
+// for the adventure game.
+// Date: 11/1/19
 ///////////////////////////////////////////////////////////////////
 
+// LIBRARIES
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -12,19 +14,17 @@
 #include <stdbool.h>
 #include <sys/stat.h>
 
+// FUNCTION PROTOTYPES
 void createRoomDir();
-struct room * createStruct();
-char ** randomTenRooms();
-
-void fillStructNames(struct room * rooms, char ** tenNames);
-void fillStructID(struct room * rooms);
-void fillStructRoomType(struct room * rooms);
+struct room * createStructArr();
+char ** getTenRooms();
+void fillNames(struct room * rooms, char ** tenNames);
+void fillID(struct room * rooms);
+void fillRoomType(struct room * rooms);
 void fillNumConnection(struct room * rooms);
 void fillConnections(struct room * rooms);
-
 void printStruct(struct room * rooms);
 void createFiles(struct room * rooms, char ** tenNames);
-
 bool IsGraphFull(struct room * rooms);
 void AddRandomConnection(struct room * rooms);
 struct room * GetRandomRoom(struct room * rooms);
@@ -44,11 +44,11 @@ struct room {
 int main() {
 	srand(time(NULL));
 	createRoomDir();
-	char ** tenrooms = randomTenRooms();
-	struct room * rooms_struct_array = createStruct();
-	fillStructNames(rooms_struct_array, tenrooms);
-	fillStructRoomType(rooms_struct_array);
-	fillStructID(rooms_struct_array);
+	char ** tenrooms = getTenRooms();
+	struct room * rooms_struct_array = createStructArr();
+	fillNames(rooms_struct_array, tenrooms);
+	fillRoomType(rooms_struct_array);
+	fillID(rooms_struct_array);
 	fillNumConnection(rooms_struct_array);
 	fillConnections(rooms_struct_array);
 	while (IsGraphFull(rooms_struct_array) == false) {
@@ -74,16 +74,15 @@ void createRoomDir() {
 }
 
 ///////////////////////////////////////////////////////////////////
-// Function: createStruct()
+// Function: createStructArr()
 // Description: Creates a struct room array that holds the room id, 
-// 				name, type, number of connections, and
-//				char array that indicates the connections for each
-//				room
+// name, type, number of connections, and char array that indicates
+// the connections for each room
 // Parameters: N/A
 // Pre-Conditions: N/A
 // Post-Conditions: Creates a struct room array
 ///////////////////////////////////////////////////////////////////
-struct room * createStruct() {
+struct room * createStructArr() {
 	struct room * rooms = (struct room *)malloc(sizeof(struct room) * 7); // Allocating memory for the struct array
 	int i,j ;
 	for(i = 0; i < 7; i++) {
@@ -96,14 +95,14 @@ struct room * createStruct() {
 }
 
 ///////////////////////////////////////////////////////////////////
-// Function: randomTenRooms()
+// Function: getTenRooms()
 // Description: Creates an array of ten room names and randomizes its
-//				order
+// order
 // Parameters: N/A
 // Pre-Conditions: N/A
 // Post-Conditions: Returns an array of ten room names
 ///////////////////////////////////////////////////////////////////
-char ** randomTenRooms() {
+char ** getTenRooms() {
 	char ** tenNames = malloc(sizeof(char *) * 10); // Allocating memory for the ten rooms
 	// Hard coded names into the tenNames array
 	tenNames[0] = "Dearborn";
@@ -130,31 +129,31 @@ char ** randomTenRooms() {
 }
 
 ///////////////////////////////////////////////////////////////////
-// Function: fillStructNames()
+// Function: fillNames()
 // Description: Fills the struct array with the first seven names 
-//				from the randomized array of ten names
+// from the randomized array of ten names
 // Parameters: struct room * rooms, char ** tenNames
 // Pre-Conditions: Takes in the struct array and array of ten random
- //				room names
+// room names
 // Post-Conditions: Fills the struct array with seven names from the 
-// 				array of ten names
+// array of ten names
 ///////////////////////////////////////////////////////////////////
-void fillStructNames(struct room * rooms, char ** tenNames) {
+void fillNames(struct room * rooms, char ** tenNames) {
 	int i;
 	for(i = 0; i < 7; i++) {
-		rooms[i].name = tenNames[i]; // Takes the first seven names from the tenNames and inserts it into the struct array
+		rooms[i].name = tenNames[i]; // Takes the first seven names from tenNames arrary and inserts it into the struct array
 	}
 }
 
 ///////////////////////////////////////////////////////////////////
-// Function: fillStructID()
+// Function: fillID()
 // Description: Assigns each room in the struct with an id number, 
-//				id values range from 0 to 6
+// id values range from 0 to 6
 // Parameters: struct room * rooms
 // Pre-Conditions: Takes in the struct array
 // Post-Conditions: Assigns each room with a unique id number
 ///////////////////////////////////////////////////////////////////
-void fillStructID(struct room * rooms) {
+void fillID(struct room * rooms) {
 	int counter = 0;
 	int i;
 	for(i = 0; i < 7; i++) {
@@ -164,15 +163,14 @@ void fillStructID(struct room * rooms) {
 }
 
 ///////////////////////////////////////////////////////////////////
-// Function: fillStructRoomType()
+// Function: fillRoomType()
 // Description: Assigns each room in the struct with room types, two rooms are
-//				the START and END rooms while the rest are MID rooms, these are
-//				assigned randomly
+// the START and END rooms while the rest are MID rooms, these are assigned randomly
 // Parameters: struct room * rooms
 // Pre-Conditions: Takes in the struct array
 // Post-Conditions: Assigns each room with a room type
 ///////////////////////////////////////////////////////////////////
-void fillStructRoomType(struct room * rooms) {
+void fillRoomType(struct room * rooms) {
 	int j = 0;
 	int k = 0;
 	while(j == k) { // Keep generating random numbers until the two numbers are not the same
@@ -223,12 +221,12 @@ void fillConnections(struct room * rooms) {
 ///////////////////////////////////////////////////////////////////
 // Function: createFiles()
 // Description: Creates a file for each room, names each file based
-//				on the room name, and writes information for each 
-//				room from the struct array into the files
+// on the room name, and writes information for each room from the struct 
+// array into the files
 // Parameters: struct room * rooms, char ** tenNames
 // Pre-Conditions: Takes in the struct array and the array of ten names
 // Post-Conditions: Creates the files and writes in the information
-//				about each room into them
+// about each room into them
 ///////////////////////////////////////////////////////////////////
 void createFiles(struct room * rooms, char ** tenNames) {
 	FILE * files[7]; // Array of seven files
@@ -255,11 +253,11 @@ void createFiles(struct room * rooms, char ** tenNames) {
 ///////////////////////////////////////////////////////////////////
 // Function: printStruct()
 // Description: Prints the content of all of the variables in the
-//				struct array
+// struct array
 // Parameters: struct room * rooms
 // Pre-Conditions: Takes in the struct array
 // Post-Conditions: Prints the information about each room to the
-//				terminal
+// terminal
 ///////////////////////////////////////////////////////////////////
 void printStruct(struct room * rooms) {
 	int i, j;
@@ -279,21 +277,21 @@ void printStruct(struct room * rooms) {
 ///////////////////////////////////////////////////////////////////
 // Function: IsGraphFull()
 // Description: Checks if all the rooms has at least three connections 
-//				but less than or equal to six connections
+// but less than or equal to six connections
 // Parameters: struct room * rooms
 // Pre-Conditions: Takes in the struct array
 // Post-Conditions: Checks if all the rooms have the required number
-//				of connections
+// of connections
 ///////////////////////////////////////////////////////////////////
 bool IsGraphFull(struct room * rooms) {
 	int counter = 0;
 	int i;
 	for(i = 0; i < 7; i++) {
-		if(rooms[i].numConnection >= 3 && rooms[i].numConnection <= 6) {
+		if(rooms[i].numConnection >= 3 && rooms[i].numConnection <= 6) { // If the number of connections is greater than 2 and less than 7
 			counter++;
 		}
 	}
-	if(counter == 7) {
+	if(counter == 7) { // Counter should be 7 when all of the rooms have more than 2 and less than 7 connections
 		return true;
 	}
 	return false;
@@ -302,8 +300,7 @@ bool IsGraphFull(struct room * rooms) {
 ///////////////////////////////////////////////////////////////////
 // Function: AddRandomConnection()
 // Description: Connects two random rooms together only if they can 
-// 				be connected, are not the same room, and if they are
-//				not connected already
+// be connected, are not the same room, and if they are not connected already
 // Parameters: struct room * rooms
 // Pre-Conditions: Takes in the struct array
 // Post-Conditions: Connects two random rooms together
@@ -312,42 +309,42 @@ void AddRandomConnection(struct room * rooms) {
 	struct room * A;
 	struct room * B;
 	while(true) {
-		A = GetRandomRoom(rooms);
-		if(CanAddConnectionFrom(A) == true) {
+		A = GetRandomRoom(rooms); // A is a random struct value from the array
+		if(CanAddConnectionFrom(A) == true) { // If connections can be added
 			break;
 		}
 	}
 	do {
-		B = GetRandomRoom(rooms);
+		B = GetRandomRoom(rooms); // B is another random struct value from the array
 	}
 	while(CanAddConnectionFrom(B) == false || IsSameRoom(A, B) == true || ConnectAlreadyExists(A, B) == true);
-	ConnectRoom(A, B);
+	ConnectRoom(A, B); // Connect A and B together
 }
 
 ///////////////////////////////////////////////////////////////////
 // Function: GetRandomRoom()
 // Description: Generates a random number and returns the struct room 
-//				associated with that index from the struct
+// associated with that index from the struct
 // Parameters: struct room * rooms
 // Pre-Conditions: Takes in the struct array and the array of ten names
 // Post-Conditions: Creates the files and writes in the information
-//				about each room into them
+// about each room into them
 ///////////////////////////////////////////////////////////////////
 struct room * GetRandomRoom(struct room * rooms) {
 	int i = rand() % 7;
-	return rooms + i;
+	return rooms + i; // returns random room from the struct array
 }
 
 ///////////////////////////////////////////////////////////////////
 // Function: CanAddConnectionFrom()
 // Description: Checks if the struct room has less than 6 connections,
-//				meaning that it can be connected to another room if it does
+// meaning that it can be connected to another room if it does
 // Parameters: struct room * rooms
 // Pre-Conditions: Takes in the struct array
 // Post-Conditions: Returns true if connections can be made, else returns false
 ///////////////////////////////////////////////////////////////////
 bool CanAddConnectionFrom(struct room * x) {
-	if(x->numConnection < 6) {
+	if(x->numConnection < 6) { // If the number of connections is less than 6
 		return true;
 	}
 	return false;
@@ -356,14 +353,13 @@ bool CanAddConnectionFrom(struct room * x) {
 ///////////////////////////////////////////////////////////////////
 // Function: IsSameRoom()
 // Description: Checks if the two randomly generated rooms are the 
-//				same or not, if their ids' are the same then the two 
-//				rooms are the same
+// same or not, if their ids' are the same then the two rooms are the same
 // Parameters: struct room * rooms
 // Pre-Conditions: Takes in two room structs to compare
 // Post-Conditions: Returns true if connections can be made, else returns false
 ///////////////////////////////////////////////////////////////////
 bool IsSameRoom(struct room * x, struct room * y) {
-	if(x->id == y->id) {
+	if(x->id == y->id) { // If the id's are the same, then they are the same room
 		return true;
 	}
 	return false;
@@ -375,10 +371,10 @@ bool IsSameRoom(struct room * x, struct room * y) {
 // Parameters: struct room * rooms
 // Pre-Conditions: Takes in two room structs to compare
 // Post-Conditions: Returns true if the rooms are already connected,
-//				else returns false
+// else returns false
 ///////////////////////////////////////////////////////////////////
 bool ConnectAlreadyExists(struct room * x, struct room * y) {
-	if((x->connections[y->id] == 'T') && (y->connections[x->id] == 'T')) {
+	if((x->connections[y->id] == 'T') && (y->connections[x->id] == 'T')) { // if connection of x at the id of y and vice versa are "T"
 		return true;
 	}
 	return false;
@@ -387,16 +383,15 @@ bool ConnectAlreadyExists(struct room * x, struct room * y) {
 ///////////////////////////////////////////////////////////////////
 // Function: ConnectRoom()
 // Description: Sets the first rooms' connections element at the index
-//				id of the second room to "T" and vice versa to indicate
-//				a connection
+// id of the second room to "T" and vice versa to indicate a connection
 // Parameters: struct room * rooms
 // Pre-Conditions: Takes in two room structs to compare
 // Post-Conditions: Sets the "F" to "T" in both of the char connections
-//				array based on the index id of the rooms
+// array based on the index id of the rooms
 ///////////////////////////////////////////////////////////////////
 void ConnectRoom(struct room * x, struct room * y) {
-	x->connections[y->id] = 'T';
-	y->connections[x->id] = 'T';
-	x->numConnection++;
-	y->numConnection++;
+	x->connections[y->id] = 'T'; // Set the connection of x at the id of y to "T" (x is connected to y)
+	y->connections[x->id] = 'T'; // Set the connection of y at the id of x to "T" (y is connected to x)
+	x->numConnection++; // Increment x's number of connections
+	y->numConnection++; // Increment y's number of connections
 }
