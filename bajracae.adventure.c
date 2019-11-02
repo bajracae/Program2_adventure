@@ -246,6 +246,8 @@ void gameFunction(struct room * rooms) {
 	char * pathList[256];
 	int countPath = 0;
 	
+	int flag = 0;
+	
 	int index = 0;
 	int start;
 	for(start = 0; start < 7; start++) {
@@ -256,6 +258,7 @@ void gameFunction(struct room * rooms) {
 	 
 	int i, j, k;
 	while(currentRoomType != "END_ROOM") {
+		if(flag == 0){
 		printf("CURRENT LOCATION: %s\n", rooms[index].name);
 		printf("POSSIBLE CONNECTIONS: ");
 		for(j = 0; j < rooms[index].numConnection; j++) {
@@ -267,11 +270,17 @@ void gameFunction(struct room * rooms) {
 			}
 		} 
 		printf("\n");
+		}
 		printf("WHERE TO? >");
 		getline(&input, &len, stdin);
 		input[strlen(input) - 1] = 0;
+		if(flag == 1){
+			printf("\n");
+		}
 		if((isConnected(input, rooms[index]) != true) && (isTime(input) != true)) {
+			printf("\n");
 			printf("HUH? I DON’T UNDERSTAND THAT ROOM. TRY AGAIN.\n");
+			printf("\n");
 		}
 		else {
 			if(isTime(input) == true) {
@@ -297,8 +306,10 @@ void gameFunction(struct room * rooms) {
 				
 				// spawn another time thread
 				pthread_create(&mp2, NULL, writeCurrentTime, 0); 
+				flag = 1;
 			}
 			else {
+				printf("\n");
 				for(i = 0; i < 7; i++) {
 					if(strcmp(input, rooms[i].name) == 0) {
 						index = i;
@@ -306,8 +317,10 @@ void gameFunction(struct room * rooms) {
 						countPath++;
 					}
 				}
+				flag = 0;
 				currentRoomType = rooms[index].type;
 				if(strcmp(currentRoomType, "END_ROOM") == 0) {
+					printf("\n");
 					printf("YOU HAVE FOUND THE END ROOM. CONGRATULATIONS!\n");
 					printf("YOU TOOK %d STEPS. YOUR PATH TO VICTORY WAS:\n", countPath);
 					for(k = 0; k < countPath; k++) {
